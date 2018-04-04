@@ -116,7 +116,7 @@ def generate_patches(num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lg
 
     while (patch_count < num_patches):
         L = LGN(width=lgn_width, p=lgn_p, r=lgn_r, t=lgn_t, trans=lgn_a,
-                make_wave=True, num_layers=2, random_seed=randint(1, 100))
+                make_wave=True, num_layers=2, random_seed=random.randint(1, 100))
         layer_activity = L.make_img_mat()
         patches_1 = np.array(skimage.extract_patches_2d(
             layer_activity[0], (patch_size, patch_size)))
