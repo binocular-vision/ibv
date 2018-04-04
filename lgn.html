@@ -1,0 +1,69 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module lgn</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>lgn</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/Users/sbsends/Desktop/binocular-vision/ibv/lgn.py">/Users/sbsends/Desktop/binocular-vision/ibv/lgn.py</a></font></td></tr></table>
+    <p></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="lgn.html#LGN">LGN</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="LGN">class <strong>LGN</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>this&nbsp;class&nbsp;defines&nbsp;a&nbsp;model&nbsp;which&nbsp;generates&nbsp;binocular&nbsp;spontaneous&nbsp;activity<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="LGN-__init__"><strong>__init__</strong></a>(self, width=128, p=0.5, r=1.0, t=1, trans=0.0, make_wave=True, num_layers=2, random_seed=0)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl><dt><a name="LGN-activate"><strong>activate</strong></a>(self)</dt><dd><tt>activate&nbsp;a&nbsp;random&nbsp;potentially&nbsp;active&nbsp;node</tt></dd></dl>
+
+<dl><dt><a name="LGN-correlation"><strong>correlation</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;correlation&nbsp;between&nbsp;the&nbsp;left&nbsp;and&nbsp;right&nbsp;images</tt></dd></dl>
+
+<dl><dt><a name="LGN-fraction_active"><strong>fraction_active</strong></a>(self)</dt><dd><tt>returns&nbsp;the&nbsp;fraction&nbsp;of&nbsp;potentially&nbsp;recruitable&nbsp;cells&nbsp;which&nbsp;are&nbsp;active</tt></dd></dl>
+
+<dl><dt><a name="LGN-make_img_mat"><strong>make_img_mat</strong></a>(self, show_img=True)</dt><dd><tt>return&nbsp;a&nbsp;matrix&nbsp;of&nbsp;1's&nbsp;and&nbsp;0's&nbsp;showing&nbsp;the&nbsp;activity&nbsp;in&nbsp;both&nbsp;layers</tt></dd></dl>
+
+<dl><dt><a name="LGN-propagate"><strong>propagate</strong></a>(self)</dt><dd><tt>propagate&nbsp;the&nbsp;activity&nbsp;if&nbsp;a&nbsp;valid&nbsp;node&nbsp;has&nbsp;been&nbsp;activated</tt></dd></dl>
+
+<dl><dt><a name="LGN-reset_wave"><strong>reset_wave</strong></a>(self)</dt><dd><tt>create&nbsp;another&nbsp;random&nbsp;wave</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-distance"><strong>distance</strong></a>(x0, y0, x1, y1)</dt></dl>
+</td></tr></table>
+</body></html>
