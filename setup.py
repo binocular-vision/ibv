@@ -10,6 +10,7 @@ setup(name='ibv',
       packages=['ibv'],
       install_requires=[
           'Pillow',
+          'google-cloud-storage',
           'numpy',
           'scipy',
           'sklearn',

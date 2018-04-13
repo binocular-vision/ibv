@@ -4,10 +4,13 @@ import json
 import hashlib
 import numpy as np
 import random
+import os
 
 from scipy import signal
 from sklearn.decomposition import FastICA
 from sklearn.feature_extraction import image as skimage
+from google.cloud import storage
+import matplotlib.pyplot as plt
 
 
 def generate_gabor(size, shift, sigma, rotation, phase_shift, frequency):
@@ -140,7 +143,7 @@ def generate_patches(num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lg
             patch_base = np.append(patch_base, composite_patches, axis=0)
         patch_count = patch_base.shape[0]
 
-    return patch_base[:num_patches]
+    return (patch_base[:num_patches], layer_activity)
 
 
 # In[5]:
@@ -162,14 +165,14 @@ def generate_filters(num_filters, num_components, num_patches, patch_size, lgn_w
     while (filter_count < num_filters):
         patches = generate_patches(
             num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lgn_a)
-        filters = perform_ica(num_components, patches)
+        filters = perform_ica(num_components, patches[0])
         if (filter_count == 0):
             filter_base = filters
         else:
             filter_base = np.append(filter_base, filters, axis=0)
         filter_count = filter_base.shape[0]
 
-    return filter_base[:num_filters]
+    return (filter_base[:num_filters], patches[0], patches[1])
 
 
 # In[7]:
@@ -273,6 +276,9 @@ def disparity_distribution(disparity_map):
 # In[16]:
 
 def run_experiment(num_filters, num_components, num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lgn_a, autostereogram, asg_patch_size, groundtruth, experiment_folder):
+    autostereogram = open_norm(autostereogram,verbose=False)
+    groundtruth = np.array(Image.open(groundtruth).convert("L"))
+
     filters = generate_filters(num_filters, num_components, num_patches,
                                patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lgn_a)
     split_filters = unpack_filters(filters)
@@ -295,9 +301,14 @@ def run_experiment(num_filters, num_components, num_patches, patch_size, lgn_wid
     current_time = time.localtime()
     ident_hash = generate_ident_hash(num_filters, num_components, num_patches,
                                      patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lgn_a, time.time())
-    image_path = "%s/%s.png" % (experiment_folder, ident_hash)
-    data_path = "%s/%s.json" % (experiment_folder, ident_hash)
-    save_array(depth_estimate, image_path)
+    image_path = "%s/images/%s.png" % (experiment_folder, ident_hash)
+    data_path = "%s/json/%s.json" % (experiment_folder, ident_hash)
+    save_array(depth_estimate, "im.png")
+    client = storage.Client()
+    bucket = client.get_bucket('ibvdata')
+    blob = bucket.blob(image_path)
+    blob.upload_from_filename("im.png")
+    blob = bucket.blob(data_path)
     params = {
         "num_filters": num_filters,
         "num_components": num_components,
@@ -312,8 +323,8 @@ def run_experiment(num_filters, num_components, num_patches, patch_size, lgn_wid
         "time": time.strftime('%a, %d %b %Y %H:%M:%S GMT', current_time),
         "id": ident_hash
     }
-    with open(data_path, 'w') as file:
-        file.write(json.dumps(params))
+    blob.upload_from_string(json.dumps(params))
+
 
     return params
 
@@ -443,3 +454,61 @@ class LGN:
             # plt.show()
 
         return img_array
+
+def save_handler(bucket, path, input_array,suffix=None):
+    for idx, input in enumerate(input_array):
+        cast_array = (255.0 / input.max() * (input - input.min())).astype(np.uint8)
+        save_image = Image.fromarray(cast_array)
+        save_image.save("tmp.png")
+        if suffix != None:
+            idx_path = "{}/{}/{}".format(path,suffix,idx)
+        else:
+            idx_path = "{}/{}".format(path,idx)
+        blob = bucket.blob(idx_path)
+        blob.upload_from_filename("tmp.png")
+        os.remove("tmp.png")
+
+
+
+
+
+
+def cloud_experiment(bucket, experiment_subparameters,patch_max,filter_max):
+    depthmap_blob = bucket.get_blob(experiment_subparameters["depthmap_path"])
+    depthmap_blob.download_to_filename("dm.png")
+    autostereogram_blob = bucket.get_blob(experiment_subparameters["autostereogram_path"])
+    autostereogram_blob.download_to_filename("as.png")
+
+    autostereogram = open_norm("as.png",verbose=False)
+    groundtruth = np.array(Image.open("dm.png").convert("L"))
+
+    res = generate_filters(experiment_subparameters["num_filters"], experiment_subparameters["num_components"], experiment_subparameters["num_patches"],
+                               experiment_subparameters["patch_size"], experiment_subparameters["lgn_size"], experiment_subparameters["lgn_parameters"]["lgn_p"], experiment_subparameters["lgn_parameters"]["lgn_r"], experiment_subparameters["lgn_parameters"]["lgn_t"], experiment_subparameters["lgn_parameters"]["lgn_a"])
+
+
+    filters = res[0]
+    patches = res[1].reshape(-1, experiment_subparameters["patch_size"],experiment_subparameters["patch_size"])
+    lgn = res[2]
+
+
+    split_filters = unpack_filters(filters)
+
+    save_handler(bucket, experiment_subparameters["lgn_dump"],lgn)
+    save_handler(bucket, experiment_subparameters["filter_dump"],split_filters[0][:filter_max],"0")
+    save_handler(bucket, experiment_subparameters["filter_dump"],split_filters[1][:filter_max],"1")
+    save_handler(bucket, experiment_subparameters["patch_dump"],patches[:patch_max])
+
+
+
+    disparity_map = linear_disparity(split_filters[0], split_filters[1])
+    normalized_disparity = normalize_disparity(disparity_map)
+
+    activity = generate_activity(autostereogram, experiment_subparameters["autostereogram_patch"], split_filters[0], split_filters[1], normalized_disparity)
+    save_handler(bucket, experiment_subparameters["activity_dump"],activity)
+
+    depth_estimate = estimate_depth(activity)
+    correlation = np.corrcoef(depth_estimate.flatten(),
+                              groundtruth.flatten())[0, 1]
+
+    experiment_subparameters["correlation"] = correlation
+    return experiment_subparameters
