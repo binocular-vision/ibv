@@ -10,7 +10,6 @@ from scipy import signal
 from sklearn.decomposition import FastICA
 from sklearn.feature_extraction import image as skimage
 from google.cloud import storage
-import matplotlib.pyplot as plt
 
 
 def generate_gabor(size, shift, sigma, rotation, phase_shift, frequency):
@@ -241,9 +240,7 @@ def save_array(input_array, path):
     cast_array = (255.0 / input_array.max() *
                   (input_array - input_array.min())).astype(np.uint8)
     save_image = Image.fromarray(cast_array)
-    colorized_image = ImageOps.colorize(save_image, (0, 0, 0), (0, 255, 0))
-    colorized_image.save(path)
-    print("SAVING ACTIVITY TO: %s" % (path))
+    save_image.save(path)
 
 
 # In[13]:
@@ -456,6 +453,13 @@ class LGN:
         return img_array
 
 def save_handler(bucket, path, input_array,suffix=None):
+    if input_array.ndim == 2:
+        save_array(input_array, "tmp.png")
+        blob = bucket.blob(path)
+        blob.upload_from_filename("tmp.png")
+        os.remove("tmp.png")
+        return
+
     for idx, input in enumerate(input_array):
         cast_array = (255.0 / input.max() * (input - input.min())).astype(np.uint8)
         save_image = Image.fromarray(cast_array)
@@ -502,11 +506,13 @@ def cloud_experiment(bucket, experiment_subparameters,patch_max,filter_max):
 
     disparity_map = linear_disparity(split_filters[0], split_filters[1])
     normalized_disparity = normalize_disparity(disparity_map)
-
     activity = generate_activity(autostereogram, experiment_subparameters["autostereogram_patch"], split_filters[0], split_filters[1], normalized_disparity)
-    save_handler(bucket, experiment_subparameters["activity_dump"],activity)
-
     depth_estimate = estimate_depth(activity)
+
+    save_handler(bucket, experiment_subparameters["activity_dump"],depth_estimate)
+
+
+
     correlation = np.corrcoef(depth_estimate.flatten(),
                               groundtruth.flatten())[0, 1]
 
