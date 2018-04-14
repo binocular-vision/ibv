@@ -254,9 +254,7 @@ def generate_ident_hash(num_filters, num_components, num_patches, patch_size, lg
 
 # In[14]:
 
-def calculate_optimal_p(t, r, a):
-    p = t / (((np.pi * (r**2)/2))*(1+a))
-    return p
+
 
 
 # In[15]:
