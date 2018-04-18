@@ -11,6 +11,10 @@ from sklearn.decomposition import FastICA
 from sklearn.feature_extraction import image as skimage
 from google.cloud import storage
 
+def calculate_optimal_p(t, r, a):
+    p = t / (((np.pi * (r**2)/2))*(1+a))
+    return p
+
 
 def generate_gabor(size, shift, sigma, rotation, phase_shift, frequency):
     radius = (int((size[0]/2.0)), int((size[1]/2.0)))
@@ -443,8 +447,13 @@ class LGN:
                 for y in range(0, w-1):
                     if self.active[l, x, y]:
                         img[x, y] = 1
+                        normal = np.array([[1,1,1],[1,0,1],[1,1,1]])
+                        conv2d = signal.convolve2d(img, normal, boundary='symm', mode='same')
+                        thresh = 4.0
+                        conv2d[np.where(conv2d < thresh)]  = 0
+                        conv2d[np.where(conv2d >= thresh)]  = 1
 
-            img_array[l] = img
+            img_array[l] = conv2d
             # plt.imshow(img)
             # plt.show()
 
