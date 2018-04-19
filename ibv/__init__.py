@@ -443,6 +443,7 @@ class LGN:
         w = self.width
         for l in range(self.num_layers):
             img = np.zeros([w, w], float)
+            conv = 0
             for x in range(0, w-1):
                 for y in range(0, w-1):
                     if self.active[l, x, y]:
@@ -452,8 +453,9 @@ class LGN:
                         thresh = 4.0
                         conv2d[np.where(conv2d < thresh)]  = 0
                         conv2d[np.where(conv2d >= thresh)]  = 1
+                        conv = conv2d
 
-            img_array[l] = conv2d
+            img_array[l] = conv
             # plt.imshow(img)
             # plt.show()
 
