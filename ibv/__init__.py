@@ -123,7 +123,12 @@ def generate_patches(num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lg
     while (patch_count < num_patches):
         L = LGN(width=lgn_width, p=lgn_p, r=lgn_r, t=lgn_t, trans=lgn_a,
                 make_wave=True, num_layers=2, random_seed=random.randint(1, 100))
-        layer_activity = L.make_img_mat()
+        try:
+            layer_activity = L.make_img_mat()
+        except ValueError as err:
+            raise err
+
+    print(err.args)
         patches_1 = np.array(skimage.extract_patches_2d(
             layer_activity[0], (patch_size, patch_size)))
         patches_2 = np.array(skimage.extract_patches_2d(
@@ -166,8 +171,11 @@ def perform_ica(num_components, patches):
 def generate_filters(num_filters, num_components, num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lgn_a):
     filter_count = 0
     while (filter_count < num_filters):
-        patches = generate_patches(
+        try:
+            patches = generate_patches(
             num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lgn_a)
+        except ValueError as err:
+            raise err
         filters = perform_ica(num_components, patches[0])
         if (filter_count == 0):
             filter_base = filters
@@ -363,7 +371,8 @@ class LGN:
         self.activated = []  # the recently active nodes
 
         if self.tot_recruitable > 0:
-            while self.fraction_active() < 0.2:
+            # changed active threshold from 20% to 1% 
+            while self.fraction_active() < 0.01:
                 self.activate()
 
     def fraction_active(self):
@@ -438,6 +447,12 @@ class LGN:
 
     def make_img_mat(self, show_img=True):
         """ return a matrix of 1's and 0's showing the activity in both layers """
+        if self.fraction_active() < 0.05:
+            raise ValueError('LGN: less than 5 percent')
+        if self.fraction_active() > 0.95:
+            raise ValueError('LGN: greater than 95 percent')
+
+
         img_array = np.zeros([self.num_layers, self.width, self.width])
         border_width = 10 if self.num_layers > 1 else 0
         w = self.width
@@ -495,10 +510,12 @@ def cloud_experiment(bucket, experiment_subparameters,patch_max,filter_max):
     autostereogram = open_norm("as.png",verbose=False)
     groundtruth = np.array(Image.open("dm.png").convert("L"))
 
-    res = generate_filters(experiment_subparameters["num_filters"], experiment_subparameters["num_components"], experiment_subparameters["num_patches"],
+    try:
+        res = generate_filters(experiment_subparameters["num_filters"], experiment_subparameters["num_components"], experiment_subparameters["num_patches"],
                                experiment_subparameters["patch_size"], experiment_subparameters["lgn_size"], experiment_subparameters["lgn_parameters"]["lgn_p"], experiment_subparameters["lgn_parameters"]["lgn_r"], experiment_subparameters["lgn_parameters"]["lgn_t"], experiment_subparameters["lgn_parameters"]["lgn_a"])
-
-
+    except ValueError as err:
+        raise err
+    
     filters = res[0]
     patches = res[1].reshape(-1, experiment_subparameters["patch_size"],experiment_subparameters["patch_size"])
     lgn = res[2]
