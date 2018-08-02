@@ -128,29 +128,23 @@ def generate_patches(num_patches, patch_size, lgn_width, lgn_p, lgn_r, lgn_t, lg
         except ValueError as err:
             raise err
 
-    print(err.args)
-        patches_1 = np.array(skimage.extract_patches_2d(
-            layer_activity[0], (patch_size, patch_size)))
-        patches_2 = np.array(skimage.extract_patches_2d(
-            layer_activity[1], (patch_size, patch_size)))
-        reshaped_patches_1 = patches_1.reshape(-1,
-                                               patches_1.shape[1]*patches_1.shape[1])
-        reshaped_patches_2 = patches_2.reshape(-1,
-                                               patches_2.shape[1]*patches_2.shape[1])
-        composite_patches = np.concatenate(
-            (reshaped_patches_1, reshaped_patches_2), axis=1)
+        print(err.args)
+        patches_1 = np.array(skimage.extract_patches_2d(layer_activity[0], (patch_size, patch_size)))
+        patches_2 = np.array(skimage.extract_patches_2d(layer_activity[1], (patch_size, patch_size)))
+        reshaped_patches_1 = patches_1.reshape(-1,patches_1.shape[1]*patches_1.shape[1])
+        reshaped_patches_2 = patches_2.reshape(-1,patches_2.shape[1]*patches_2.shape[1])
+        composite_patches = np.concatenate((reshaped_patches_1, reshaped_patches_2), axis=1)
         blacklist = []
         for x in range(composite_patches.shape[0]):
             if composite_patches[x][:half_comp].std() == 0.0 or composite_patches[x][half_comp:].std() == 0.0:
                 blacklist.append(x)
-        composite_patches = np.delete(
-            composite_patches, np.array(blacklist), axis=0)
+                composite_patches = np.delete(composite_patches, np.array(blacklist), axis=0)
         if (patch_count == 0):
             patch_base = composite_patches
         else:
             patch_base = np.append(patch_base, composite_patches, axis=0)
-        patch_count = patch_base.shape[0]
-
+            patch_count = patch_base.shape[0]
+    
     return (patch_base[:num_patches], layer_activity)
 
 
