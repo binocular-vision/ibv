@@ -376,7 +376,7 @@ class LGN:
         if self.tot_recruitable > 0:
             return float(self.tot_recruitable_active) / self.tot_recruitable
         else:
-            return nan
+            return float('NaN')
 
     def propagate(self):
         """ propagate the activity if a valid node has been activated """
@@ -431,7 +431,7 @@ class LGN:
             return 0
         w = self.width
         active01 = np.zeros([2, w, w], int)
-        active01[where(self.active)] = 1
+        active01[np.where(self.active)] = 1
 
         mean0 = active01[0, :, :].mean()
         mean1 = active01[1, :, :].mean()
@@ -454,7 +454,6 @@ class LGN:
 
 
         img_array = np.zeros([self.num_layers, self.width, self.width])
-        border_width = 10 if self.num_layers > 1 else 0
         w = self.width
         for l in range(self.num_layers):
             img = np.zeros([w, w], float)
