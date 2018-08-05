@@ -445,7 +445,7 @@ class LGN:
         """ return a matrix of 1's and 0's showing the activity in both layers """
         percentage_active = float(self.active.sum()) / self.allcells
         print(percentage_active)
-        if percentage_active < 0.05:
+        if percentage_active < 0.02:
             print('LGN: activity less than low bound')
             raise ValueError('LGN: activity less than low bound')
         if percentage_active > 0.99:
