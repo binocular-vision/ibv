@@ -342,7 +342,7 @@ class LGN:
     """
 
     def __init__(self, width=128, p=0.5, r=1.0, t=1, trans=0.0,
-                 make_wave=True, num_layers=2, random_seed=0):
+        make_wave=True, num_layers=2, random_seed=0):
         random.seed(random_seed)
         self.width = width
         self.p = p
@@ -368,7 +368,7 @@ class LGN:
 
         if self.tot_recruitable > 0:
             # changed active threshold from 20% to 1% 
-            while self.fraction_active() < 0.01:
+            while self.fraction_active() < 0.20:
                 self.activate()
 
     def fraction_active(self):
@@ -444,6 +444,7 @@ class LGN:
     def make_img_mat(self, show_img=True):
         """ return a matrix of 1's and 0's showing the activity in both layers """
         percentage_active = float(self.active.sum()) / self.allcells
+        print(percentage_active)
         if percentage_active < 0.01:
             print('LGN: activity less than low bound')
             raise ValueError('LGN: activity less than low bound')
