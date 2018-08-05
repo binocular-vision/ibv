@@ -442,8 +442,10 @@ class LGN:
     def make_img_mat(self, show_img=True):
         """ return a matrix of 1's and 0's showing the activity in both layers """
         if self.fraction_active() < 0.05:
+            print("activity below 5%")
             raise ValueError('LGN: less than 5 percent')
         if self.fraction_active() > 0.95:
+            print("activity above 95%")
             raise ValueError('LGN: greater than 95 percent')
 
 
